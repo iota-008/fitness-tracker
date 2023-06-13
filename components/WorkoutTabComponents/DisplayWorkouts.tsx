@@ -7,65 +7,83 @@ import { Query } from 'appwrite';
 
 const DisplayWorkouts = ( { workouts, setWorkouts, user, currentDate } ) =>
 {
-
     const toast = useToast();
     const [loading, setLoading] = useState( false );
 
-    useEffect( () =>
-    {
-    }, [workouts] )
+    useEffect( () => { }, [workouts] );
 
-    const handleDeleteWorkout = useCallback( async ( id ) =>
-    {
-
-        try
+    const handleDeleteWorkout = useCallback(
+        async ( id ) =>
         {
-            setLoading( true );
-            setWorkouts( ( prevWorkouts ) => prevWorkouts.filter( ( workout ) => workout.id !== id ) );
-            const todaysWorkouts = await appDatabase.listDocuments(
-                DbConstants.WorkoutTrackerDatabaseId,
-                DbConstants.UserWorkoutsCollectionId,
-                [
-                    Query.equal( 'UserId', user.$id ),
-                    Query.equal( 'Date', currentDate )
-                ]
-            );
-            let document = todaysWorkouts.documents[0];
-            const updatedDocument = { ...document };
+            try
+            {
+                setLoading( true );
 
-            delete updatedDocument.$collectionId
-            delete updatedDocument.$createdAt
-            delete updatedDocument.$databaseId
-            delete updatedDocument.$id
-            delete updatedDocument.$permissions
-            delete updatedDocument.$updatedAt
+                // Remove the workout from the list
+                setWorkouts( ( prevWorkouts ) =>
+                    prevWorkouts.filter( ( workout ) => workout.$id !== id )
+                );
 
-            updatedDocument.WorkoutIds = updatedDocument.WorkoutIds.filter( ( workoutId ) => workoutId !== id );
-            appDatabase.updateDocument( DbConstants.WorkoutTrackerDatabaseId, DbConstants.UserWorkoutsCollectionId, document.$id, updatedDocument )
-                .then(
-                    () =>
-                    {
-                        toast.show( {
-                            title: "Workout Delete",
-                            variant: "solid",
-                        } )
-                    },
-                    ( error ) =>
-                    {
-                        console.error( error );
-                    }
-                )
-            await appDatabase.deleteDocument( DbConstants.WorkoutTrackerDatabaseId, DbConstants.WorkoutDetailsCollectionId, id );
-        }
-        catch ( ex )
-        {
-            console.log( ex );
-        }
-        finally
-        {
-            setLoading( false );
-        }
-    }, [currentDate, workouts, user.$id] )
+                const todaysWorkouts = await appDatabase.listDocuments(
+                    DbConstants.WorkoutTrackerDatabaseId,
+                    DbConstants.UserWorkoutsCollectionId,
+                    [
+                        Query.equal( 'UserId', user.$id ),
+                        Query.equal( 'Date', currentDate ),
+                    ]
+                );
+                let document = todaysWorkouts.documents[0];
+                const updatedDocument = { ...document };
+
+                delete updatedDocument.$collectionId;
+                delete updatedDocument.$createdAt;
+                delete updatedDocument.$databaseId;
+                delete updatedDocument.$id;
+                delete updatedDocument.$permissions;
+                delete updatedDocument.$updatedAt;
+
+                updatedDocument.WorkoutIds = updatedDocument.WorkoutIds.filter(
+                    ( workoutId ) => workoutId !== id
+                );
+
+                // Update the document in the database
+                appDatabase
+                    .updateDocument(
+                        DbConstants.WorkoutTrackerDatabaseId,
+                        DbConstants.UserWorkoutsCollectionId,
+                        document.$id,
+                        updatedDocument
+                    )
+                    .then(
+                        () =>
+                        {
+                            toast.show( {
+                                title: 'Workout Delete',
+                                variant: 'solid',
+                            } );
+                        },
+                        ( error ) =>
+                        {
+                            console.error( error );
+                        }
+                    );
+
+                // Delete the workout document
+                await appDatabase.deleteDocument(
+                    DbConstants.WorkoutTrackerDatabaseId,
+                    DbConstants.WorkoutDetailsCollectionId,
+                    id
+                );
+            } catch ( ex )
+            {
+                console.log( ex );
+            } finally
+            {
+                setLoading( false );
+            }
+        },
+        [currentDate, setWorkouts, user.$id]
+    );
 
     const renderContent = useCallback( ( item ) =>
     {
@@ -74,27 +92,40 @@ const DisplayWorkouts = ( { workouts, setWorkouts, user, currentDate } ) =>
                 <Box>
                     <Box flexDirection="row">
                         <Box flex={1}>
-                            <Text fontSize={12} _dark={{ color: 'warmGray.50' }} color="coolGray.800" bold>
+                            <Text
+                                fontSize={12}
+                                _dark={{ color: 'warmGray.50' }}
+                                color="coolGray.800"
+                                bold
+                            >
                                 Reps
                             </Text>
                             {item.Repetitions.map( ( rep, index ) => (
-                                <Text color="coolGray.600" key={index}>{rep}</Text>
+                                <Text color="coolGray.600" key={index}>
+                                    {rep}
+                                </Text>
                             ) )}
                         </Box>
                         <Box flex={1}>
-                            <Text fontSize={12} _dark={{ color: 'warmGray.50' }} color="coolGray.800" bold>
+                            <Text
+                                fontSize={12}
+                                _dark={{ color: 'warmGray.50' }}
+                                color="coolGray.800"
+                                bold
+                            >
                                 Weights (kgs)
                             </Text>
                             {item.Weights.map( ( weight, index ) => (
-                                <Text color="coolGray.600" key={index}>{weight}</Text>
+                                <Text color="coolGray.600" key={index}>
+                                    {weight}
+                                </Text>
                             ) )}
                         </Box>
                     </Box>
                 </Box>
-
             </VStack>
         );
-    }, [] )
+    }, [] );
 
     return (
         <View>
@@ -102,27 +133,49 @@ const DisplayWorkouts = ( { workouts, setWorkouts, user, currentDate } ) =>
                 data={workouts}
                 keyExtractor={( item: any ) => item.$id}
                 renderItem={( { item } ) => (
-                    <Box borderBottomWidth={1} borderColor="muted.800" pl={['0', '4']} pr={['0', '5']} py="2" m="3" backgroundColor={"black"} borderRadius={10}>
-                        <HStack space={[2, 3]} justifyContent="space-between" margin={2}>
+                    <Box
+                        borderBottomWidth={1}
+                        borderColor="muted.800"
+                        pl={['0', '4']}
+                        pr={['0', '5']}
+                        py="2"
+                        m="3"
+                        backgroundColor={'black'}
+                        borderRadius={10}
+                    >
+                        <HStack
+                            space={[2, 3]}
+                            justifyContent="space-between"
+                            margin={2}
+                        >
                             <Text color="white" bold>
                                 {item.Name}
                             </Text>
-                            <Text color="white" >
-                                {item.Duration} min
-                            </Text>
-                            <Text color="white" >
-                                {item.CaloriesBurned} cal
-                            </Text>
-                            <IconButton onPress={() => handleDeleteWorkout( item.$id )}
+                            <Text color="white">{item.Duration} min</Text>
+                            <Text color="white">{item.CaloriesBurned} cal</Text>
+                            <IconButton
+                                onPress={() => handleDeleteWorkout( item.$id )}
                                 icon={<MaterialIcons name="delete-outline" size={20} color="red" />}
                                 borderRadius="full"
                                 padding={[0]}
                             />
                         </HStack>
 
-                        <Accordion allowMultiple w="95%" ml="2" bg="white" borderRadius={5} borderWidth={1} overflow="hidden">
+                        <Accordion
+                            allowMultiple
+                            w="95%"
+                            ml="2"
+                            bg="white"
+                            borderRadius={5}
+                            borderWidth={1}
+                            overflow="hidden"
+                        >
                             <Accordion.Item>
-                                <Accordion.Summary _expanded={{ backgroundColor: 'muted.300' }} _hover={{ backgroundColor: 'muted.100' }} borderBottomRadius={5}>
+                                <Accordion.Summary
+                                    _expanded={{ backgroundColor: 'muted.300' }}
+                                    _hover={{ backgroundColor: 'muted.100' }}
+                                    borderBottomRadius={5}
+                                >
                                     <Text color="coolGray.600" fontSize={12}>
                                         <Icon as={MaterialIcons} name="expand-more" />
                                     </Text>
@@ -130,22 +183,22 @@ const DisplayWorkouts = ( { workouts, setWorkouts, user, currentDate } ) =>
                                 <Accordion.Details>{renderContent( item )}</Accordion.Details>
                             </Accordion.Item>
                         </Accordion>
-
                     </Box>
                 )}
             />
 
-            {loading ?
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
-                    <Box flex={1} justifyContent={"center"} alignItems={"center"} alignSelf={"center"}>
-                        <Spinner accessibilityLabel="deleting" style={{ margin: 10, padding: 10 }} color={"black"} />
+            {loading && (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <Box flex={1} justifyContent="center" alignItems="center" alignSelf="center">
+                        <Spinner accessibilityLabel="deleting" style={{ margin: 10, padding: 10 }} color={'black'} />
                         <Heading color="black" fontSize="md">
                             deleting...
                         </Heading>
                     </Box>
-                </View> : null}
+                </View>
+            )}
         </View>
-    )
-}
+    );
+};
 
-export default DisplayWorkouts
+export default DisplayWorkouts;
