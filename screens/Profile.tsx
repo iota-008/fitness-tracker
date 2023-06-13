@@ -1,31 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { TextInput } from 'react-native';
 import { appDatabase } from '../services/appwrite-service';
 import { DbConstants } from '../constants';
 import { Query } from 'appwrite';
 import { DeleteDocumentFields } from '../shared';
-import { Text, View, Container, List, Accordion, Box, VStack, Icon, FlatList, HStack, IconButton, Spinner, Heading, Button } from 'native-base';
-import { MaterialIcons } from '@expo/vector-icons';
-import { Table, Row, Rows } from 'react-native-table-component';
+import { Text, View, List, Box, Spinner, Heading, Button, Input } from 'native-base';
 
 const UserProfileScreen = ( { route } ) =>
 {
     const [loader, setLoader] = useState( false );
-    const [documentId, setDocumentId] = useState( "" );
+    const [documentId, setDocumentId] = useState( '' );
     const [userDetails, setUserDetails] = useState( {
-        Name: "",
-        Age: "",
-        Gender: "",
-        Email: "",
-        Height: "",
-        Weight: "",
-        Mobile: "",
+        Name: '',
+        Age: '',
+        Gender: '',
+        Email: '',
+        Height: '',
+        Weight: '',
+        Mobile: '',
     } );
     const [editableFields, setEditableFields] = useState( {
-        Email: "",
-        Mobile: "",
-        Height: "",
-        Weight: "",
+        Email: '',
+        Mobile: '',
+        Height: '',
+        Weight: '',
     } );
 
     useEffect( () =>
@@ -33,24 +30,15 @@ const UserProfileScreen = ( { route } ) =>
         fetchUserDetails();
     }, [] );
 
-    // useEffect( () =>
-    // {
-    //     console.log( userDetails );
-    //     console.log( editableFields );
-    // }, [userDetails, editableFields] );
-
     const fetchUserDetails = async () =>
     {
         setLoader( true );
         try
         {
-
             const response = await appDatabase.listDocuments(
                 DbConstants.WorkoutTrackerDatabaseId,
                 DbConstants.UsersCollectionId,
-                [
-                    Query.equal( 'UserId', route.params.userId ),
-                ]
+                [Query.equal( 'UserId', route.params.userId )]
             );
             setDocumentId( response.documents[0].$id );
             const user = DeleteDocumentFields( response.documents[0] );
@@ -66,7 +54,6 @@ const UserProfileScreen = ( { route } ) =>
             console.error( error );
         } finally
         {
-
             setLoader( false );
         }
     };
@@ -84,7 +71,6 @@ const UserProfileScreen = ( { route } ) =>
         setLoader( true );
         try
         {
-            // Perform the update operation for the editable fields
             const updateData = {
                 Weight: editableFields.Weight,
                 Height: editableFields.Height,
@@ -97,7 +83,6 @@ const UserProfileScreen = ( { route } ) =>
                 documentId,
                 updateData
             );
-            // Refresh user details after update
             await fetchUserDetails();
         } catch ( error )
         {
@@ -110,72 +95,93 @@ const UserProfileScreen = ( { route } ) =>
 
     return !loader ? (
         <View flex={1} m={5}>
-            <List space={2}>
+            <List space={2} backgroundColor="white" borderRadius={10} p="3">
                 <List.Item>
-                    <Text fontWeight="bold">Name: </Text>
-                    <Text>{userDetails.Name}</Text>
+                    <Text color="black" fontWeight="bold">
+                        Name:
+                    </Text>
+                    <Text pl="1" color="black">{userDetails.Name}</Text>
                 </List.Item>
                 <List.Item>
-                    <Text fontWeight="bold">Age: </Text>
-                    <Text>{userDetails.Age}</Text>
+                    <Text color="black" fontWeight="bold">
+                        Age:
+                    </Text>
+                    <Text pl="1" color="black">{userDetails.Age}</Text>
                 </List.Item>
                 <List.Item>
-                    <Text fontWeight="bold">Gender: </Text>
-                    <Text>{userDetails.Gender}</Text>
+                    <Text color="black" fontWeight="bold">
+                        Gender:
+                    </Text>
+                    <Text pl="1" color="black">{userDetails.Gender}</Text>
                 </List.Item>
-                <List.Item></List.Item>
-
                 <List.Item>
-                    <Text fontWeight="bold">Weight: </Text>
-                    <TextInput
+                    <Text color="black" fontWeight="bold">
+                        Email:
+                    </Text>
+                    <Text pl="1" color="black">{userDetails.Email}</Text>
+                </List.Item>
+                <List.Item >
+                    <Text color="black" fontWeight="bold" mr="2">
+                        Weight:
+                    </Text>
+                    <Input
                         value={editableFields.Weight.toString()}
                         onChangeText={( text ) => updateField( 'Weight', text )}
                         placeholder="Enter weight"
+                        color="black"
+                        ml={1}
+                        variant="rounded"
+                        w={{
+                            base: "75%",
+                            md: "25%"
+                        }}
                     />
                 </List.Item>
                 <List.Item>
-                    <Text fontWeight="bold">Height: </Text>
-                    <TextInput
+                    <Text color="black" fontWeight="bold" mr="2">
+                        Height:
+                    </Text>
+                    <Input
                         value={editableFields.Height.toString()}
                         onChangeText={( text ) => updateField( 'Height', text )}
                         placeholder="Enter height"
+                        color="black"
+                        variant="rounded"
+                        w={{
+                            base: "75%",
+                            md: "25%"
+                        }}
                     />
                 </List.Item>
                 <List.Item>
-                    <Text fontWeight="bold">Phone: </Text>
-                    <TextInput
+                    <Text color="black" fontWeight="bold" mr="2">
+                        Phone:
+                    </Text>
+                    <Input
                         value={editableFields?.Mobile?.toString()}
                         onChangeText={( text ) => updateField( 'Mobile', text )}
                         placeholder="Enter phone number"
+                        color="black"
+                        variant="rounded"
+                        w={{
+                            base: "75%",
+                            md: "25%"
+                        }}
                     />
                 </List.Item>
-                <List.Item>
-                    <Text fontWeight="bold">Email: </Text>
-                    <TextInput
-                        value={editableFields?.Email}
-                        onChangeText={( text ) => updateField( 'Email', text )}
-                        placeholder="Enter email"
-                    />
-                </List.Item>
-                {/* <List.Item>
-                    <Text fontWeight="bold">Password: </Text>
-                    <TextInput
-                        value={editableFields.password}
-                        onChangeText={( text ) => updateField( 'password', text )}
-                        placeholder="Enter password"
-                    />
-                </List.Item> */}
             </List>
-            <Button onPress={saveUpdates} mt={4}>
+
+            <Button onPress={saveUpdates} mt={4} backgroundColor="black" color="black" borderRadius={10}>
                 Save Changes
             </Button>
+            
         </View>
     ) : (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <Box flex={1} justifyContent="center" alignItems="center" alignSelf="center">
-                <Spinner accessibilityLabel="Loading posts" />
-                <Heading color="primary.500" fontSize="md">
-                    Loading
+                <Spinner accessibilityLabel="loading profile" style={{ margin: 10, padding: 10 }} color="black" />
+                <Heading color="black" fontSize="md">
+                    loading profile...
                 </Heading>
             </Box>
         </View>
