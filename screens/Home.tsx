@@ -81,28 +81,15 @@ const HomeScreen = ( { navigation } ) =>
     }
   }
 
-  if ( loading )
-  {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Box flex={1} justifyContent={"center"} alignItems={"center"} alignSelf={"center"}>
-          <Spinner accessibilityLabel="Loading posts" style={{ margin: 10, padding: 10 }} />
-          <Heading color="primary.500" fontSize="md">
-            Loading
-          </Heading>
-        </Box>
-      </View>
-    );
-  }
-
-  return user ? (
+  return ( user && !loading ) ? (
     <View flex={1} >
 
       <Box
         flexDirection="row"
         alignItems="center"
         justifyContent="space-between"
-        backgroundColor="gray.500"
+        backgroundColor="black"
+        borderBottomRadius={10}
         pt={Platform.OS === 'android' ? StatusBar.currentHeight : 0}
       >
         <Pressable
@@ -111,11 +98,11 @@ const HomeScreen = ( { navigation } ) =>
           width={10}
           height={10}
           marginLeft={4}
-          bg={"primary.500"}
+          bg={"white"}
           justifyContent="center"
           alignItems="center"
         >
-          <Text color="white" fontSize="md" fontWeight="bold">
+          <Text color="black" fontSize="md" fontWeight="bold">
             {user.name[0]}
           </Text>
         </Pressable>
@@ -130,7 +117,7 @@ const HomeScreen = ( { navigation } ) =>
               backgroundColor: "transparent"
             }}
           >
-            <Icon as={MaterialIcons} name="history" color="white" />
+            <Icon as={MaterialIcons} name="history" color="white" size={5} />
           </Button>
 
 
@@ -144,7 +131,7 @@ const HomeScreen = ( { navigation } ) =>
               backgroundColor: "transparent"
             }}
           >
-            <Icon as={MaterialIcons} name="logout" color="white" />
+            <Icon as={MaterialIcons} name="logout" color="white" size={5} />
           </Button>
         </Box>
       </Box>
@@ -181,9 +168,9 @@ const HomeScreen = ( { navigation } ) =>
   ) : (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Box flex={1} justifyContent={"center"} alignItems={"center"} alignSelf={"center"}>
-        <Spinner accessibilityLabel="Loading posts" style={{ margin: 10, padding: 10 }} />
-        <Heading color="primary.500" fontSize="md">
-          Loading
+        <Spinner accessibilityLabel="Loading" style={{ margin: 10, padding: 10 }} color="black" />
+        <Heading color="black" fontSize="md">
+          loading...
         </Heading>
       </Box>
     </View>

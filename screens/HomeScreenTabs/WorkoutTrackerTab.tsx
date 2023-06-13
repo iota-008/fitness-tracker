@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Text, View, IconButton } from 'native-base';
+import React, { useState, useEffect, memo, useCallback } from 'react';
+import { Text, View, IconButton, Box, Icon } from 'native-base';
 import { Ionicons } from '@expo/vector-icons';
 import { appDatabase } from '../../services/appwrite-service';
 import { DbConstants } from '../../constants';
 import { Query } from 'appwrite';
 import FormModal from '../../components/WorkoutTabComponents/FormModal';
 import DisplayWorkouts from '../../components/WorkoutTabComponents/DisplayWorkouts';
-
 
 const WorkoutTrackerComponent = ( { user } ) =>
 {
@@ -17,10 +16,10 @@ const WorkoutTrackerComponent = ( { user } ) =>
     useEffect( () =>
     {
         var date = new Date();
-        var currentDate = date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate();
+        var currentDate =
+            date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate();
         setCurrentDate( currentDate );
     }, [] );
-
 
     useEffect( () =>
     {
@@ -30,8 +29,7 @@ const WorkoutTrackerComponent = ( { user } ) =>
         } )();
     }, [currentDate] );
 
-
-    const fetchUserWorkouts = async () =>
+    const fetchUserWorkouts = useCallback( async () =>
     {
         try
         {
@@ -40,7 +38,7 @@ const WorkoutTrackerComponent = ( { user } ) =>
                 DbConstants.UserWorkoutsCollectionId,
                 [
                     Query.equal( 'UserId', user.$id ),
-                    Query.equal( 'Date', currentDate )
+                    Query.equal( 'Date', currentDate ),
                 ]
             );
 
@@ -58,7 +56,7 @@ const WorkoutTrackerComponent = ( { user } ) =>
 
                     // Check if the workout already exists in the workouts state
                     const workoutExists = workouts.some(
-                        ( workout ) => workout.$id == workoutDetails.$id
+                        ( workout ) => workout.$id === workoutDetails.$id
                     );
 
                     if ( !workoutExists )
@@ -68,33 +66,60 @@ const WorkoutTrackerComponent = ( { user } ) =>
                 }
             }
             setWorkouts( ( prevWorkouts ) => [...prevWorkouts, ...newWorkouts] );
-        }
-        catch ( error )
+        } catch ( error )
         {
             console.error( error );
         }
+    }, [currentDate, user.$id, workouts] );
 
-    };
-
-    const handleAddWorkout = () =>
+    const handleAddWorkout = useCallback( () =>
     {
         setShowModal( true );
-    };
+    }, [] );
 
     return (
         <View style={{ flex: 1 }}>
-            <FormModal showModal={showModal} setShowModal={setShowModal} fetchUserWorkouts={fetchUserWorkouts} user={user} currentDate={currentDate} />
-            <DisplayWorkouts workouts={workouts} setWorkouts={setWorkouts} user={user} currentDate={currentDate} />
+            <FormModal
+                showModal={showModal}
+                setShowModal={setShowModal}
+                fetchUserWorkouts={fetchUserWorkouts}
+                user={user}
+                currentDate={currentDate}
+            />
+            <MemoizedDisplayWorkouts
+                workouts={workouts}
+                setWorkouts={setWorkouts}
+                user={user}
+                currentDate={currentDate}
+            />
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <IconButton
-                    onPress={handleAddWorkout}
-                    icon={<Ionicons name="add-circle" size={80} color="black" />}
-                    borderRadius="full"
-                    style={{ width: 100, height: 100 }}
-                />
+                <Box position="absolute" bottom={0} >
+
+
+                    <IconButton
+                        onPress={handleAddWorkout}
+                        icon={<Ionicons name="add-circle" size={80} color="black" />}
+                        borderRadius="full"
+                        padding={0}
+                        style={{ width: 100, height: 100, backgroundColor: 'white' }}
+                    />
+                </Box>
             </View>
         </View>
     );
 };
+
+const areEqual = ( prevProps, nextProps ) =>
+{
+    // Check if the relevant props have changed
+    return (
+        prevProps.workouts === nextProps.workouts &&
+        prevProps.setWorkouts === nextProps.setWorkouts &&
+        prevProps.user === nextProps.user &&
+        prevProps.currentDate === nextProps.currentDate
+    );
+};
+
+const MemoizedDisplayWorkouts = memo( DisplayWorkouts, areEqual );
 
 export default WorkoutTrackerComponent;

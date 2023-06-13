@@ -1,7 +1,6 @@
 import 'react-native-gesture-handler';
 import { NativeBaseProvider } from 'native-base'
 
-
 //navigation
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -22,7 +21,7 @@ export default function App()
       <NavigationContainer>
         <Stack.Navigator
           screenOptions={( { route } ) => ( {
-            headerShown: route.name === 'History', // Set headerShown to true only for the "History" screen
+            headerShown: route.name === 'History' || route.name === 'Profile', // Set headerShown to true only for the "History" screen
           } )} >
           <Stack.Screen name='Home' component={HomeScreen} options={{ headerShown: false }} />
           <Stack.Screen name='Login' component={LoginScreen} options={{ headerShown: false }} />
