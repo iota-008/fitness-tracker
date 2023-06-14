@@ -4,19 +4,41 @@ import { Text, Button, View, Modal, ScrollView, Center, useToast, Input, Box, Sp
 import { appDatabase, storage } from '../../services/appwrite-service';
 import { DbConstants } from '../../constants';
 import { ID, Query } from 'appwrite';
+import { DeleteDocumentFields } from '../../shared';
 
 const FormModal = ( { showModal, setShowModal, fetchUserWorkouts, user, currentDate } ) =>
 {
     const toast = useToast();
     const [loading, setLoading] = useState( false );
+    const [userDetails, setUserDetails] = useState( null );
 
     useEffect( () =>
     {
         ( async () =>
         {
             await fetchAvailableWorkouts();
+            await fetchUserDetails();
+
         } )();
     }, [user] );
+
+    const fetchUserDetails = async () =>
+    {
+        appDatabase.listDocuments( DbConstants.WorkoutTrackerDatabaseId, DbConstants.UsersCollectionId, [
+            Query.equal( 'UserId', user.$id ),
+        ] ).then(
+            ( result ) =>
+            {
+
+                const userDetails = DeleteDocumentFields( result.documents[0] );
+                setUserDetails( userDetails )
+            },
+            ( error ) =>
+            {
+                console.error( error );
+            }
+        )
+    }
 
     const [selectedWorkout, setSelectedWorkout] = useState( null );
     const [workoutTime, setWorkoutTime] = useState( '' );
@@ -162,14 +184,7 @@ const FormModal = ( { showModal, setShowModal, fetchUserWorkouts, user, currentD
             } else
             {
                 var currentDocument = currentWorkouts.documents[0];
-                const updatedDocument = { ...currentDocument };
-
-                delete updatedDocument.$collectionId
-                delete updatedDocument.$createdAt
-                delete updatedDocument.$databaseId
-                delete updatedDocument.$id
-                delete updatedDocument.$permissions
-                delete updatedDocument.$updatedAt
+                const updatedDocument = DeleteDocumentFields( currentDocument );
 
                 updatedDocument.WorkoutIds.push( addWorkoutDetailResponse.$id );
 
@@ -203,10 +218,64 @@ const FormModal = ( { showModal, setShowModal, fetchUserWorkouts, user, currentD
         }
     }, [user.$id, currentDate, availableWorkouts, selectedWorkout, workoutTime, setsCount, weightsUsed, repetitions] );
 
-    const calculateCaloriesBurned = useCallback( () =>
+    const calculateCaloriesBurned = () =>
     {
-        return 50;
-    }, [] );
+        const age_in_years = parseInt( userDetails.Age );
+        const weight_in_kg = parseInt( userDetails.Weight );
+        const gender = userDetails.Gender;
+        const height_in_cm = parseFloat( userDetails.Height );
+        const duration_in_minutes = parseInt( workoutTime );
+        const reps = repetitions;
+        const sets = setsCount;
+        const weights = weightsUsed;
+        let calories = 0;
+
+
+        // Harris-Benedict Equation for Basal Metabolic Rate (BMR)
+        const a_m = 88.362,
+            b_m = 13.397,
+            c_m = 4.799,
+            d_m = 5.677;
+        const a_f = 447.593,
+            b_f = 9.247,
+            c_f = 3.098,
+            d_f = 4.330;
+        const BMR =
+            gender === 'MALE'
+                ? a_m + b_m * weight_in_kg + c_m * height_in_cm - d_m * age_in_years
+                : a_f + b_f * weight_in_kg + c_f * height_in_cm - d_f * age_in_years;
+
+        for ( let i = 0; i < parseInt( sets ); i++ )
+        {
+            const MET_for_set = calculateMET( parseFloat( weights[i] ), parseInt( reps[i] ), weight_in_kg, age_in_years, height_in_cm );
+
+            // Calculate calories burned per set using MET value, duration, and BMR
+            const caloriesPerSet = Math.round( ( BMR * MET_for_set * duration_in_minutes ) / 60 );
+            calories = calories + caloriesPerSet;
+
+        }
+
+        return calories / 10;
+    };
+
+    const calculateMET = ( weightsUsed: any, repetitions: number, bodyWeight: number, age: number, height: number ) =>
+    {
+
+        const weightMultiplier = 0.029;
+        const ageMultiplier = 0.017;
+        const heightMultiplier = 0.0128;
+        const repMultiplier = 0.0087;
+
+        const metPerSet = (
+            ( weightsUsed / bodyWeight ) * weightMultiplier +
+            ( age * ageMultiplier ) +
+            ( height * heightMultiplier ) +
+            ( repetitions * repMultiplier )
+        );
+
+        return metPerSet;
+    };
+
 
     return !loading ? (
         <Center>

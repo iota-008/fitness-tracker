@@ -1,5 +1,5 @@
 import React, { useState, useEffect, memo, useCallback } from 'react';
-import { Text, View, IconButton, Box, Icon } from 'native-base';
+import { Text, View, IconButton, Box, Icon, Pressable } from 'native-base';
 import { Ionicons } from '@expo/vector-icons';
 import { appDatabase } from '../../services/appwrite-service';
 import { DbConstants } from '../../constants';
@@ -93,17 +93,20 @@ const WorkoutTrackerComponent = ( { user } ) =>
                 currentDate={currentDate}
             />
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Box position="absolute" bottom={0} >
-
-
-                    <IconButton
-                        onPress={handleAddWorkout}
-                        icon={<Ionicons name="add-circle" size={80} color="black" />}
-                        borderRadius="full"
-                        padding={0}
-                        style={{ width: 100, height: 100, backgroundColor: 'white' }}
-                    />
-                </Box>
+                <View style={{ position: 'absolute', bottom: 1 }}>
+                    <Pressable onPress={handleAddWorkout}>
+                        {( {
+                            isPressed
+                        } ) =>
+                        {
+                            return <Icon as={Ionicons} name="add-circle" size={20} color="black" style={{
+                                transform: [{
+                                    scale: isPressed ? 0.96 : 1
+                                }]
+                            }} />
+                        }}
+                    </Pressable>
+                </View>
             </View>
         </View>
     );

@@ -4,6 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { appDatabase } from '../../services/appwrite-service';
 import { DbConstants } from '../../constants';
 import { Query } from 'appwrite';
+import { DeleteDocumentFields } from '../../shared';
 
 const DisplayWorkouts = ( { workouts, setWorkouts, user, currentDate } ) =>
 {
@@ -33,14 +34,8 @@ const DisplayWorkouts = ( { workouts, setWorkouts, user, currentDate } ) =>
                     ]
                 );
                 let document = todaysWorkouts.documents[0];
-                const updatedDocument = { ...document };
 
-                delete updatedDocument.$collectionId;
-                delete updatedDocument.$createdAt;
-                delete updatedDocument.$databaseId;
-                delete updatedDocument.$id;
-                delete updatedDocument.$permissions;
-                delete updatedDocument.$updatedAt;
+                const updatedDocument = DeleteDocumentFields( document );
 
                 updatedDocument.WorkoutIds = updatedDocument.WorkoutIds.filter(
                     ( workoutId ) => workoutId !== id
@@ -76,10 +71,14 @@ const DisplayWorkouts = ( { workouts, setWorkouts, user, currentDate } ) =>
                 );
             } catch ( ex )
             {
-                console.log( ex );
+                console.error( ex );
             } finally
             {
                 setLoading( false );
+                setTimeout( () =>
+                {
+                    toast.closeAll();
+                }, 1000 )
             }
         },
         [currentDate, setWorkouts, user.$id]
@@ -189,7 +188,7 @@ const DisplayWorkouts = ( { workouts, setWorkouts, user, currentDate } ) =>
 
             {loading && (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <Box flex={1} justifyContent="center" alignItems="center" alignSelf="center">
+                    <Box flex={1} justifyContent="center" alignItems="center" alignSelf="center" mt={3}>
                         <Spinner accessibilityLabel="deleting" style={{ margin: 10, padding: 10 }} color={'black'} />
                         <Heading color="black" fontSize="md">
                             deleting...

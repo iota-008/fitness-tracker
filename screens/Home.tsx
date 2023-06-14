@@ -26,11 +26,11 @@ const HomeScreen = ( { navigation } ) =>
         const data = await account.get();
         if ( data )
         {
-          toast.show( {
-            title: "Login Successfull",
-            variant: "solid",
-            description: "Welcome back"
-          } )
+          // toast.show( {
+          //   title: "Login Successfull",
+          //   variant: "solid",
+          //   description: "Welcome back!"
+          // } )
           setUser( { ...data } );
         }
       }
@@ -48,6 +48,10 @@ const HomeScreen = ( { navigation } ) =>
       } finally
       {
         setLoading( false );
+        setTimeout( () =>
+        {
+          toast.closeAll();
+        }, 1000 )
       }
     } )();
 

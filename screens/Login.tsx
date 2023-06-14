@@ -19,11 +19,11 @@ const LoginScreen = ( { navigation } ) =>
       data.then(
         () =>
         {
-          toast.show( {
-            title: "Login Successful",
-            variant: "solid",
-            description: "Welcome back"
-          } )
+          // toast.show( {
+          //   title: "Login Successfull",
+          //   variant: "solid",
+          //   description: "Welcome back"
+          // } )
           navigation.reset( {
             index: 0,
             routes: [{ name: ScreenRoutes.Home }]
@@ -31,12 +31,12 @@ const LoginScreen = ( { navigation } ) =>
         },
         ( error ) =>
         {
-          console.error( error );
+          // console.error( error );
         }
       )
     } else
     {
-      console.log( "Login Failed" );
+      console.error( "Login Failed" );
     }
 
   }, [] )
@@ -69,7 +69,7 @@ const LoginScreen = ( { navigation } ) =>
       setUser( { Email: '', Password: '' } )
 
       toast.show( {
-        title: "Login Successful",
+        title: "Login Successfull",
         variant: "solid",
         description: "Welcome back"
       } )
@@ -91,13 +91,17 @@ const LoginScreen = ( { navigation } ) =>
     finally
     {
       setLodaing( false );
+      setTimeout( () =>
+      {
+        toast.closeAll();
+      }, 1000 )
     }
 
   };
 
   return !loading ?
     (
-      <Stack space={4} w="100%" maxW="300px" mx="auto" my="auto">
+      <Stack space={4} w="100%" maxW="300px" mx="auto" my="auto" borderWidth={2} borderColor={'white'} padding={5} borderRadius={20} backgroundColor={'white'} alignItems={'center'} >
         <Input variant={"rounded"} mx="3" placeholder="Email" w="100%" value={user.Email} onChangeText={( val ) => setUser( { ...user, Email: val } )} />
         <Input variant={"rounded"} mx="3" placeholder="Password" w="100%" value={user.Password} onChangeText={( val ) => setUser( { ...user, Password: val } )} secureTextEntry />
         <Button mx="3" w="100%" rounded="full" onPress={handleLogin} backgroundColor={"black"}><Text color={"white"}>Login</Text></Button>
