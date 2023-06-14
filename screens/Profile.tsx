@@ -45,7 +45,7 @@ const UserProfileScreen = ( { route } ) =>
             setUserDetails( user );
             setEditableFields( {
                 Email: user.Email,
-                Mobile: user.Phone,
+                Mobile: user.Mobile,
                 Height: user.Height,
                 Weight: user.Weight,
             } );
@@ -155,12 +155,12 @@ const UserProfileScreen = ( { route } ) =>
                 </List.Item>
                 <List.Item>
                     <Text color="black" fontWeight="bold" mr="2">
-                        Phone:
+                        Mobile:
                     </Text>
                     <Input
                         value={editableFields?.Mobile?.toString()}
                         onChangeText={( text ) => updateField( 'Mobile', text )}
-                        placeholder="Enter phone number"
+                        placeholder="Enter mobile number"
                         color="black"
                         variant="rounded"
                         w={{
@@ -174,7 +174,7 @@ const UserProfileScreen = ( { route } ) =>
             <Button onPress={saveUpdates} mt={4} backgroundColor="black" color="black" borderRadius={10}>
                 Save Changes
             </Button>
-            
+
         </View>
     ) : (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>

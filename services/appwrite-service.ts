@@ -1,7 +1,8 @@
-import { Client, Account, Databases, Storage  } from 'appwrite';
+import { projectIdENV, apiEndPointENV } from '@env';
+import { Client, Account, Databases, Storage } from 'appwrite';
 
-const projectId = "64666c9ec73c936a8d12";
-const apiEndPoint = "https://cloud.appwrite.io/v1";
+const projectId = projectIdENV;
+const apiEndPoint = apiEndPointENV;
 
 const client = new Client();
 
